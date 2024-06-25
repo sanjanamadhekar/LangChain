@@ -3,11 +3,11 @@ from langchain_openai import OpenAI
 from colorama import Fore
 
 load_dotenv()
-
+llm = OpenAI()
 
 def generate(text):
     """ generate text based on the input """
-    pass
+    return llm.invoke(text)
 
 
 def start():
@@ -38,6 +38,7 @@ def ask():
         if user_input == "x":
             start()
         else:
+
             response = generate(user_input)
             print(Fore.BLUE + f"A: " + response + Fore.RESET)
             print(Fore.WHITE + "\n-------------------------------------------------")
