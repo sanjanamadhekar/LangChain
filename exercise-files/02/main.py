@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# create a vectorstore
+# create a vectorstore & embeddings
 
 # querying the vectorstore
 
