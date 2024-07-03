@@ -1,5 +1,6 @@
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,6 +18,10 @@ vectorstore = FAISS.from_texts(
 )
 
 # querying the vectorstore
+query = "Where did Harrison work?"
+docs = vectorstore.similarity_search(query, top_k=1)
+print(docs[0].page_content)
+
 
 # querying as retriever
 
