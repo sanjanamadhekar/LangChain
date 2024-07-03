@@ -11,7 +11,7 @@ prompt_template = ChatPromptTemplate.from_template("tell me a short joke about {
 def generate(text):
     """ generate text based on the input """
     chain = prompt_template | llm
-    return chain.invoke(text)
+    return chain.invoke({"topic": text})
 
 def start():
     instructions = (
