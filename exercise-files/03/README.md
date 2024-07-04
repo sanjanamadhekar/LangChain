@@ -37,7 +37,7 @@ To install the repository, follow these steps:
    ```
    pip install -r requirements.txt
    pip install -U langchain-community
-   ip install -U langchain-openai
+   pip install -U langchain-openai
    ```
 
 3. Additionally, you need to obtain an OpenAI API key and add it to the `.env` file.
