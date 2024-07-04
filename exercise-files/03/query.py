@@ -33,7 +33,13 @@ template: str = """/
 # indexing
 def load_split_documents():
     """Load a file from path, split it into chunks, embed each chunk and load it into the vector store."""
-    pass
+    raw_text = TextLoader("./docs/faq.txt").load()
+    text_splitter = CharacterTextSplitter(chunk_size=30, chunk_overlap=0, separator=".")
+    chunks = text_splitter.split_documents(raw_text)
+    print(f"number of chunks {len(chunks)}")
+    print(chunks[0])
+    return chunks
+
 
 # convert to embeddings
 def load_embeddings(documents, user_query):
@@ -48,4 +54,6 @@ def generate_response(retriever, query):
 
 def query(query):
     """Query the model with a user query."""
-    pass
+    load_split_documents()
+
+query("")
