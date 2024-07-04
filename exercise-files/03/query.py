@@ -30,10 +30,12 @@ template: str = """/
 
 # init model
 
-def load_documents():
+# indexing
+def load_split_documents():
     """Load a file from path, split it into chunks, embed each chunk and load it into the vector store."""
     pass
 
+# convert to embeddings
 def load_embeddings(documents, user_query):
     """Create a vector store from a set of documents."""
     pass
