@@ -14,10 +14,20 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_community.vectorstores import Chroma
+from openai import OpenAI
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
 load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_embedding(text_to_embed):
+    response = client.embeddings.create(
+        model= "text-embedding-ada-002",
+        input=[text_to_embed]
+    )
+    print(response.data[0].embedding)
 
 template: str = """/
     You are a customer support specialist /
@@ -33,7 +43,13 @@ template: str = """/
 # indexing
 def load_split_documents():
     """Load a file from path, split it into chunks, embed each chunk and load it into the vector store."""
-    pass
+    raw_text = TextLoader("./docs/faq.txt").load()
+    text_splitter = CharacterTextSplitter(chunk_size=30, chunk_overlap=0, separator=".")
+    chunks = text_splitter.split_documents(raw_text)
+    print(f"number of chunks {len(chunks)}")
+    print(chunks[0])
+    return chunks
+
 
 # convert to embeddings
 def load_embeddings(documents, user_query):
@@ -48,4 +64,6 @@ def generate_response(retriever, query):
 
 def query(query):
     """Query the model with a user query."""
-    pass
+    load_split_documents()
+
+query("")
