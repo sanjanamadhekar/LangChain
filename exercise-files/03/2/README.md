@@ -1,6 +1,7 @@
-## Project :  Build a LLM-powered chatbot application using OpenAI and LangChain
+## Project :  Q&A Chatbot Challenge
 ....
 
+[documentation link](https://python.langchain.com/v0.1/docs/use_cases/question_answering/chat_history/)
 This is a Python application that uses the OpenAI API to generate text based on a user's input.
 
 ## **Install Python** ![Python](img/python_65.png)
