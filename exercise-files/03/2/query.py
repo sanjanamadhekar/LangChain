@@ -65,9 +65,15 @@ question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
 
 def generate_response(query):
     """ Generate a response to a user query"""
-    pass
+    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+    return rag_chain.invoke({
+        "chat_history": chat_history,
+        "input": query
+    })
 
 
 def query(query):
     """ Query and generate a response"""
-    return generate_response(query)
+    response = generate_response(query)
+    chat_history.extend([HumanMessage(content=query), response["answer"]])
+    return response
