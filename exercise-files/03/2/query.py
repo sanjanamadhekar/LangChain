@@ -48,11 +48,19 @@ qa_prompt = ChatPromptTemplate.from_messages(
 )
 
 # indexing
-
+documents = TextLoader("./docs/faq.txt").load()
+text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=0, separator="\n")
+splits = text_splitter.split_documents(documents)
+db = Chroma.from_documents(documents, OpenAIEmbeddings())
+retriever = db.as_retriever()
 
 # Retrieve chat history
+history_aware_retriever = create_history_aware_retriever(
+    llm, retriever, contextualize_q_prompt
+)
 
 # Retrieve and generate 
+question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
 
 
 def generate_response(query):
