@@ -46,15 +46,20 @@ def load_split_documents():
     raw_text = TextLoader("./docs/faq.txt").load()
     text_splitter = CharacterTextSplitter(chunk_size=30, chunk_overlap=0, separator=".")
     chunks = text_splitter.split_documents(raw_text)
-    print(f"number of chunks {len(chunks)}")
-    print(chunks[0])
+    # print(f"number of chunks {len(chunks)}")
+    # print(chunks[0])
     return chunks
 
 
 # convert to embeddings
 def load_embeddings(documents, user_query):
     """Create a vector store from a set of documents."""
-    pass
+    embeddings = OpenAIEmbeddings()
+    db = Chroma.from_documents(documents, embeddings)
+    docs = db.similarity_search(user_query)
+    print(docs)
+    get_embedding(user_query)
+    _ = [get_embedding(doc.page_content) for doc in docs]
 
 
 def generate_response(retriever, query):
@@ -64,6 +69,7 @@ def generate_response(retriever, query):
 
 def query(query):
     """Query the model with a user query."""
-    load_split_documents()
+    documents = load_split_documents()
+    load_embeddings(documents, query)
 
-query("")
+query("what is the return policy?")
