@@ -31,10 +31,11 @@ def get_embedding(text_to_embed):
 
 template: str = """/
     You are a customer support specialist /
-    question: . 
-    You assist users with general inquiries based on /
+    question: {question}. 
+    You assist users with general inquiries based on {context} /
     and  technical issues. /
     """
+
 
 # define prompt
 system_message_prompt_template = SystemMessagePromptTemplate.from_template(template)
