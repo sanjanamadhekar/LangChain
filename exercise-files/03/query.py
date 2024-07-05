@@ -36,10 +36,16 @@ template: str = """/
     and  technical issues. /
     """
 
-
 # define prompt
 system_message_prompt_template = SystemMessagePromptTemplate.from_template(template)
-chat_prompt_template = ChatPromptTemplate.from_messages([system_message_prompt_template, HumanMessagePromptTemplate.from_template("{user_query}")])
+human_message_prompt_template = HumanMessagePromptTemplate.from_template(
+    input_variables=["question", "context"], 
+    template="{question}"
+)
+chat_prompt_template = ChatPromptTemplate.from_messages([
+    system_message_prompt_template, 
+    human_message_prompt_template
+])
 
 # init model
 model = ChatOpenAI()
@@ -61,21 +67,27 @@ def load_embeddings(documents, user_query):
     embeddings = OpenAIEmbeddings()
     db = Chroma.from_documents(documents, embeddings)
     docs = db.similarity_search(user_query)
-    print(docs)
-    get_embedding(user_query)
-    _ = [get_embedding(doc.page_content) for doc in docs]
+    # print(docs)
+    # get_embedding(user_query)
+    # _ = [get_embedding(doc.page_content) for doc in docs]
+    return db.as_retriever()
 
 
-def generate_response(query):
+def generate_response(retriever, query):
     """Generate a response to a user query."""
-    chain = chat_prompt_template | model | StrOutputParser()
-    return chain.invoke({"user_query": query })
+    chain = (
+        {"context": retriever, "question": "what is the return policy?"}
+        | chat_prompt_template 
+        | model 
+        | StrOutputParser()
+    )
+    return chain.invoke(query)
 
 
 def query(query):
     """Query the model with a user query."""
     documents = load_split_documents()
-    load_embeddings(documents, query)
-    return generate_response(query)
+    retriever = load_embeddings(documents, query)
+    return generate_response(retriever, query)
 
-query("what is the return policy?")
+# query("what is the return policy?")
