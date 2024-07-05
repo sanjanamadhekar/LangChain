@@ -14,10 +14,20 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_community.vectorstores import Chroma
+from openai import OpenAI
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
 load_dotenv()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_embedding(text_to_embed):
+    response = client.embeddings.create(
+        model= "text-embedding-ada-002",
+        input=[text_to_embed]
+    )
+    print(response.data[0].embedding)
 
 template: str = """/
     You are a customer support specialist /
