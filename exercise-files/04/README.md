@@ -60,9 +60,19 @@ streamlit run app.py
 **Windows**:
 ```
 python main.py
+```
 
-## Contributing
-This repository is intended for educational purposes only and is not designed to accept external contributions. It serves as supplemental material for the YouTube tutorial, demonstrating how to build the project.
+## Deploy your app - [Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app)
 
-For any suggestions or improvements related to the tutorial content, please feel free to reach out through the YouTube channel's comment section.
+1.  Add the app to GitHub
+    - create and add a `.gitignore` 
+    - push project to a public remote repository
+
+2. Create an account [signup](https://share.streamlit.io/signup)
+    - You will be required to verify your email.
+
+3. Deploy App - [deploy](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app)
+   
+    - create a new app - [create app](https://share.streamlit.io/new)
+    - add and manage secret keys - [secret managements](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management)
 
