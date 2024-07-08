@@ -25,7 +25,7 @@ llm_function_calling = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
 
 # Prompt with Query analysis
 class Search(BaseModel):
-    """Search for information about a clothes category."""
+    """Search for information about a clothing category."""
 
     query: str = Field(
         ...,
