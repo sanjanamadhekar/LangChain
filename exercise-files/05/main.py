@@ -10,6 +10,7 @@ from langchain_community.vectorstores import Chroma
 from typing import List, Optional
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain import hub
+from langchain_core.runnables import chain
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -59,3 +60,18 @@ docs = vectorstore.similarity_search("who worked at Facebook?")
 
 
 # Retrieval with Query analysis
+
+retrievers = {
+    "HARRISON": retriever_harrison,
+    "ANKUSH": retriever_ankush,
+}
+
+@chain
+def custom_chain(question):
+    structured_output = query_analyzer.invoke(question)
+    retriever = retrievers[structured_output.person]
+    return retriever.invoke(structured_output.query)
+
+
+response = custom_chain.invoke("where did Ankush work?")
+print(response[0].page_content)
