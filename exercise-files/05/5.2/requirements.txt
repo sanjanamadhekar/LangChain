@@ -1,0 +1,10 @@
+langchain==0.1.13
+langchain-openai==0.1.1
+tiktoken==0.6.0
+python-dotenv==1.0.1
+openai
+beautifulsoup4==4.12.3
+bs4==0.0.2
+chromadb==0.4.24
+langchainhub==0.1.15
+faiss-cpu==1.8.0
