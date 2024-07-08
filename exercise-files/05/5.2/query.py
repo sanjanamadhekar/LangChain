@@ -54,7 +54,6 @@ template: str = """/
     You are a customer support specialist /
     question: {question}. 
     You assist users with general inquiries based on {context} /
-    and  technical issues. /
     """
 
 # define prompt
@@ -73,20 +72,39 @@ chat_prompt_template = ChatPromptTemplate.from_messages([
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 raw_text_shoes = TextLoader('./docs/faq_shoes.txt').load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+documents = text_splitter.split_documents(raw_text_shoes)
+vector_store = Chroma.from_documents(documents, embeddings)
+retriever_shoes = vector_store.as_retriever()
 
 raw_text_shirts = TextLoader('./docs/faq_shirts.txt').load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+documents = text_splitter.split_documents(raw_text_shirts)
+vector_store = Chroma.from_documents(documents, embeddings)
+retriever_shirts = vector_store.as_retriever()
 
 # Retrieval with Query analysis
 retrievers = {
-    "SHOES": {},
-    "SHIRTS": {},
+    "SHOES": retriever_shoes,
+    "SHIRTS": retriever_shirts,
 }
 
 def select_retriever_query_analysis(question):
     """Select a retriever based on the query analysis."""
+    structured_output = query_analyzer.invoke(question)
+    category = structured_output.category
+    return retrievers[category]
 
 def query(user_query: str):
-    """Final chain to query, retrieve information and generate augmented response."""   
+    """Final chain to query, retrieve information and generate augmented response."""
+    retriever = select_retriever_query_analysis(user_query)
+
+    return (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | chat_prompt_template
+        | llm
+        | StrOutputParser()
+    )  
 
 response = query("how long do we have to return shirts?")
 print(response)

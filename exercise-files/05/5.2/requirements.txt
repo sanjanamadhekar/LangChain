@@ -8,3 +8,4 @@ bs4==0.0.2
 chromadb==0.4.24
 langchainhub==0.1.15
 faiss-cpu==1.8.0
+colorama==0.4.6
