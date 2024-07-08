@@ -52,7 +52,7 @@ query_analyzer = {"question": RunnablePassthrough()} | prompt | structured_llm
 # Prompt for Retrieval and Generation tasks
 template: str = """/
     You are a customer support specialist /
-    question: {question}. 
+    who answers question: {question}. 
     You assist users with general inquiries based on {context} /
     """
 
@@ -83,6 +83,7 @@ documents = text_splitter.split_documents(raw_text_shirts)
 vector_store = Chroma.from_documents(documents, embeddings)
 retriever_shirts = vector_store.as_retriever()
 
+
 # Retrieval with Query analysis
 retrievers = {
     "SHOES": retriever_shoes,
@@ -98,13 +99,13 @@ def select_retriever_query_analysis(question):
 def query(user_query: str):
     """Final chain to query, retrieve information and generate augmented response."""
     retriever = select_retriever_query_analysis(user_query)
-
     return (
         {"context": retriever, "question": RunnablePassthrough()}
         | chat_prompt_template
         | llm
         | StrOutputParser()
-    )  
+    ).invoke(user_query)
+ 
 
 response = query("how long do we have to return shirts?")
 print(response)
