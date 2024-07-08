@@ -15,9 +15,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 llm = ChatOpenAI(temperature=0)
-
+llm_function_calling = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
 
 # Prompt with Query analysis
+class Search(BaseModel):
+    """Search for information about a person."""
+
+    query: str = Field(
+        ...,
+        description="Query to look up",
+    )
+    person: str = Field(
+        ...,
+        description="Person to look things up for. Should be `HARRISON` or `ANKUSH`.",
+    )
+
+system = """You have the ability to issue search queries to get information to help answer user information."""
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system),
+        ("human", "{question}"),
+    ]
+)
+structured_llm = llm_function_calling.with_structured_output(Search)
+query_analyzer = {"question": RunnablePassthrough()} | prompt | structured_llm
+
+structured_output = query_analyzer.invoke("where did Harrison Work")
+print(structured_output)
 
 # Create Index & Connect to datasource
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -31,7 +55,7 @@ vectorstore = Chroma.from_texts(texts, embeddings, collection_name="ankush")
 retriever_ankush = vectorstore.as_retriever(search_kwargs={"k": 1})
 
 docs = vectorstore.similarity_search("who worked at Facebook?")
-print(docs[0].page_content)
+# print(docs[0].page_content)
 
 
 # Retrieval with Query analysis
