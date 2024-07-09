@@ -1,55 +1,41 @@
-from langchain.chains import RetrievalQA
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pymongo import MongoClient
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-
-model = ChatOpenAI(model="gpt-4-turbo-preview")
-ATLAS_CONNECTION_STRING = os.getenv("ATLAS_CONNECTION_STRING")
-DB_NAME = os.getenv("DB_NAME")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
-ATLAS_VECTOR_SEARCH_INDEX_NAME = os.getenv("ATLAS_VECTOR_SEARCH_INDEX_NAME")
-
-# Connect to your Atlas cluster
-client = MongoClient(ATLAS_CONNECTION_STRING)
-
-# Define collection and index name
-collection = client[DB_NAME][COLLECTION_NAME]
-
-if client:
-    print("Connected to MongoDB Atlas")
-    print(client.list_database_names())
-
-# Load the sample data (PDF document)
-loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
-data = loader.load()
-
-# Split PDF into smaller documents
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
-docs = text_splitter.split_documents(data)
-
-# Print the first document
-print(docs[0])
-
-# Instantiate the vector store
-# Create the vector store
-vector_store = MongoDBAtlasVectorSearch.from_documents(
-    documents=docs,
-    embedding=OpenAIEmbeddings(disallowed_special=()),
-    collection=COLLECTION_NAME,
-    index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
-)
+from colorama import Fore
+from query import query 
 
 
-def query_data(query):
-    """run vector search queries"""
-    # results = vector_search.similarity_search(query)
-    # print(results)
+def start():
+    instructions = (
+        """Type your question and press ENTER. Type 'x' to go back to the MAIN menu.\n"""
+    )
+    print(Fore.BLUE + "\n\x1B[3m" + instructions + "\x1B[0m" + Fore.RESET)
 
-query_data("MongoDB Atlas Sec")
+    print("MENU")
+    print("====")
+    print("[1]- Ask a question")
+    print("[2]- Exit")
+    choice = input("Enter your choice: ")
+    if choice == "1":
+        ask()
+    elif choice == "2":
+        print("Goodbye!")
+        exit()
+    else:
+        print("Invalid choice")
+        start()
 
+
+def ask():
+    while True:
+        user_input = input("Q: ")
+        # Exit
+        if user_input == "x":
+            start()
+        else:
+
+            response = query(user_input)
+            print(Fore.BLUE + "A: " + response + Fore.RESET)
+            print(Fore.WHITE + 
+                  "\n-------------------------------------------------")
+
+
+if __name__ == "__main__":
+    start()
