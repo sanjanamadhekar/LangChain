@@ -53,13 +53,3 @@ def query_data(query):
 
 query_data("MongoDB Atlas Security Best Practices")
 
-# Instantiate Atlas Vector Search as a retriever
-
-
-# Define a prompt template
- 
-
-# Construct a chain to answer questions on your data
-
-
-# Prompt the chain to answer a question
