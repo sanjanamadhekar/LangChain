@@ -3,6 +3,7 @@ from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import PromptTemplate
+from langchain.schema import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pymongo import MongoClient
@@ -70,6 +71,7 @@ rag_chain = (
     {"context": retriever, "question": RunnablePassthrough() }
     | custom_rag_prompt
     | llm
+    |  StrOutputParser()
 )
 
 
@@ -77,7 +79,7 @@ rag_chain = (
 question = "How can I secure my MongoDB Atlas cluster?"
 answer = rag_chain.invoke(question)
 
-print(answer)
+# print(answer)
 
-# print("Question: " + question)
-# print("Answer: " + answer)
+print("Question: " + question)
+print("Answer: " + answer)
