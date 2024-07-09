@@ -34,8 +34,8 @@ if client:
 
 def query_data(query):
     """run vector search queries"""
-    results = vector_search.similarity_search(query)
-    print(results)
+    # results = vector_search.similarity_search(query)
+    # print(results)
 
 query_data("MongoDB Atlas Sec")
 
