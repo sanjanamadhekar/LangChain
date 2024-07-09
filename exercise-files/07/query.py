@@ -45,11 +45,15 @@ vector_store = MongoDBAtlasVectorSearch.from_documents(
 )
 
 
-def query_data(query):
-    """run vector search queries"""
-    results = vector_store.similarity_search(query)
-    print(results)
-    return results[0].page_content
 
-query_data("MongoDB Atlas Security Best Practices")
+# Instantiate Atlas Vector Search as a retriever
+
+
+# Define a prompt template
+ 
+
+# Construct a chain to answer questions on your data
+
+
+# Prompt the chain to answer a question
 

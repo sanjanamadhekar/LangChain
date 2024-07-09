@@ -52,14 +52,3 @@ def query_data(query):
     return results[0].page_content
 
 query_data("MongoDB Atlas Security Best Practices")
-
-# Instantiate Atlas Vector Search as a retriever
-
-
-# Define a prompt template
- 
-
-# Construct a chain to answer questions on your data
-
-
-# Prompt the chain to answer a question
