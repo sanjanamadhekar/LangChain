@@ -1,5 +1,5 @@
 from colorama import Fore
-from query import query 
+from query import query_data 
 
 
 def start():
@@ -31,7 +31,7 @@ def ask():
             start()
         else:
 
-            response = query(user_input)
+            response = query_data(user_input)
             print(Fore.BLUE + "A: " + response + Fore.RESET)
             print(Fore.WHITE + 
                   "\n-------------------------------------------------")
