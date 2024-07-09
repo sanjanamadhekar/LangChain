@@ -10,10 +10,19 @@ import os
 load_dotenv()
 
 model = ChatOpenAI(model="gpt-4-turbo-preview")
+ATLAS_CONNECTION_STRING = os.getenv("ATLAS_CONNECTION_STRING")
+DB_NAME = os.getenv("DB_NAME")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 # Connect to your Atlas cluster
+client = MongoClient(ATLAS_CONNECTION_STRING)
 
 # Define collection and index name
+collection = client[DB_NAME][COLLECTION_NAME]
+
+if client:
+    print("Connected to MongoDB Atlas")
+    print(client.list_database_names())
 
 # Load the sample data (PDF document)
 
