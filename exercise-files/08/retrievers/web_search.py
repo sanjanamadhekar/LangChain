@@ -24,4 +24,12 @@ retriever = vector.as_retriever()
 prompt = hub.pull("rlm/rag-prompt")
 
 # Construct a chain to answer questions on your data
+web_search_chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt 
+    | model
+    | StrOutputParser()
+)
+
+
 

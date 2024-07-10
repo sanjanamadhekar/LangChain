@@ -8,7 +8,7 @@ from langchain.agents.format_scratchpad.openai_tools import (
 from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
 from langchain.agents import AgentExecutor
 from retrievers.vector_search_index import rag_chain
-# from retrievers.web_search import search_engine_chain
+from retrievers.web_search import web_search_chain
 
 load_dotenv()
 
@@ -28,7 +28,12 @@ def vector_search_query(query):
     """search queries using vector search"""
     return rag_chain.invoke(query)
 
-tools = [get_word_length, vector_search_query]
+@tool
+def web_search_query(query):
+    """search queries using web search for additional information"""
+    return web_search_chain.invoke(query)
+
+tools = [get_word_length, vector_search_query, web_search_query]
 
 # create the prompt
 
