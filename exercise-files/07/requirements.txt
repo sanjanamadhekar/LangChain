@@ -11,3 +11,4 @@ langsmith
 tiktoken==0.6.0
 pydantic
 pymongo
+pypdf==4.2.0
