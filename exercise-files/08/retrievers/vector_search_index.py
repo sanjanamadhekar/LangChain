@@ -60,6 +60,11 @@ custom_rag_prompt = PromptTemplate.from_template(template)
  
 
 # Construct a chain to answer questions on your data
-
+rag_chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | custom_rag_prompt 
+    | model
+    | StrOutputParser
+)
 
 

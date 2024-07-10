@@ -16,6 +16,18 @@ load_dotenv()
 
 # define the tool
 
+@tool
+def get_word_length(word: str) -> int:
+    """Returns the length of a word."""
+    return len(word)
+
+get_word_length.invoke("abc")
+
+@tool 
+def vector_search_query(query):
+    return rag_chain.invoke(query)
+
+
 # create the prompt
 
 # bind the tool to the LLM
