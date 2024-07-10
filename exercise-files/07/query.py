@@ -71,15 +71,17 @@ rag_chain = (
     {"context": retriever, "question": RunnablePassthrough() }
     | custom_rag_prompt
     | llm
-    |  StrOutputParser()
+    | StrOutputParser()
 )
 
-
 # Prompt the chain to answer a question
-question = "How can I secure my MongoDB Atlas cluster?"
-answer = rag_chain.invoke(question)
+def query_data(query):
+    question = "How can I secure my MongoDB Atlas cluster?"
+    answer = rag_chain.invoke(query)
+    print("Question: " + question)
+    print("Answer: " + answer)
+    return answer
 
-# print(answer)
 
-print("Question: " + question)
-print("Answer: " + answer)
+
+
