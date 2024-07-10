@@ -15,8 +15,7 @@ load_dotenv()
 # load the LLM
 llm = ChatOpenAI()  
 
-# define the tool
-
+# define the tools
 @tool
 def get_word_length(word: str) -> int:
     """Returns the length of a word."""
@@ -37,7 +36,8 @@ prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are very powerful assistant, but don't know current events",
+            """You are very powerful assistant, but don't know current event. if you don't know the answer, just say 'I don't know' 
+            . do not try to make up an answer.""",
         ),
         ("user", "{input}"),
         MessagesPlaceholder(variable_name="agent_scratchpad"),
@@ -66,7 +66,8 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 def run_agent(query):
     question = "How to secure a MongoDB Atlas Cluster"
-    return agent_executor.invoke({"input": query})
+    answer = agent_executor.invoke({"input": query})
+    return answer["output"]
 
-answer = run_agent("How to secure a MongoDB Atlas Cluster")
-print(answer)
+# answer = run_agent("How to secure a MongoDB Atlas Cluster")
+# print(answer)
