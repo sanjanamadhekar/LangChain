@@ -8,11 +8,12 @@ from langchain.agents.format_scratchpad.openai_tools import (
 from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
 from langchain.agents import AgentExecutor
 from retrievers.vector_search_index import rag_chain
-from retrievers.web_search import search_engine_chain
+# from retrievers.web_search import search_engine_chain
 
 load_dotenv()
 
 # load the LLM
+llm = ChatOpenAI()  
 
 # define the tool
 
@@ -25,8 +26,10 @@ get_word_length.invoke("abc")
 
 @tool 
 def vector_search_query(query):
+    """search queries using vector search"""
     return rag_chain.invoke(query)
 
+tools = [get_word_length, vector_search_query]
 
 # create the prompt
 
@@ -58,3 +61,12 @@ agent = (
 )
 
 # run the agent
+
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+def run_agent(query):
+    question = "How to secure a MongoDB Atlas Cluster"
+    return agent_executor.invoke({"input": query})
+
+answer = run_agent("How to secure a MongoDB Atlas Cluster")
+print(answer)
