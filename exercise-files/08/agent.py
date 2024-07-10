@@ -41,8 +41,20 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-# bind the tool to the LLM
+# bind the tools to the LLM
+llm_with_tools = llm.bind_tools(tools)
 
 # create the agent
+agent = (
+    {
+        "input": lambda x: x["input"],
+        "agent_scratchpad": lambda x: format_to_openai_tool_messages(
+            x["intermediate_steps"]
+        ),
+    }
+    | prompt
+    | llm_with_tools
+    | OpenAIToolsAgentOutputParser()
+)
 
 # run the agent
