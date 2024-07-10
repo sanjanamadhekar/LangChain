@@ -30,6 +30,17 @@ def vector_search_query(query):
 
 # create the prompt
 
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are very powerful assistant, but don't know current events",
+        ),
+        ("user", "{input}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"),
+    ]
+)
+
 # bind the tool to the LLM
 
 # create the agent
