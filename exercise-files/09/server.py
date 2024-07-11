@@ -38,5 +38,14 @@ app = FastAPI(
 # create runnable
 
 # create routes
+add_routes(
+    app,
+    model,
+    path="/openai",
+)
 
 # run server
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="localhost", port=8000)
