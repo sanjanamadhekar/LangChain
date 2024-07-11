@@ -44,6 +44,12 @@ add_routes(
     path="/openai",
 )
 
+add_routes(
+    app,
+    prompt | model | RunnableLambda(parseResponse),
+    path="/joke",
+)
+
 # run server
 if __name__ == "__main__":
     import uvicorn
