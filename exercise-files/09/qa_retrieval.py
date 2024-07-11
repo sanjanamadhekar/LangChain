@@ -19,7 +19,7 @@ COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 ATLAS_VECTOR_SEARCH_INDEX_NAME = os.getenv("ATLAS_VECTOR_SEARCH_INDEX_NAME")
 
 # Connect to your Atlas cluster
-client = MongoClient("mongodb+srv://sandy:QbFNnJL2o6SEO0Vo@clusterlangchain.es7v444.mongodb.net/?retryWrites=true&w=majority&appName=ClusterLangChain")
+client = MongoClient(ATLAS_CONNECTION_STRING)
 
 # Define collection and index name
 collection = client[DB_NAME][COLLECTION_NAME]
