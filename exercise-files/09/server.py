@@ -36,6 +36,7 @@ app = FastAPI(
 )
 
 # create runnable
+chain =  prompt | model | RunnableLambda(parseResponse)
 
 # create routes
 add_routes(
@@ -46,7 +47,7 @@ add_routes(
 
 add_routes(
     app,
-    prompt | model | RunnableLambda(parseResponse),
+    chain,
     path="/joke",
 )
 
