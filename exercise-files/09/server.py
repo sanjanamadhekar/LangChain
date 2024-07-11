@@ -29,6 +29,11 @@ def parseResponse(response: AIMessage) -> str:
     return  response.content
 
 # create server
+app = FastAPI(
+    title="LangChain Server",
+    version="1.0",
+    description="A simple api server using Langchain's Runnable interfaces",
+)
 
 # create runnable
 
