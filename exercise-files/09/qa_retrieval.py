@@ -19,14 +19,14 @@ COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 ATLAS_VECTOR_SEARCH_INDEX_NAME = os.getenv("ATLAS_VECTOR_SEARCH_INDEX_NAME")
 
 # Connect to your Atlas cluster
-client = MongoClient("mongodb+srv://sandy:QbFNnJL2o6SEO0Vo@clusterlangchain.es7v444.mongodb.net/?retryWrites=true&w=majority&appName=ClusterLangChain")
+client = MongoClient("mongodb+srv://sandy:0gcQXomh85f4Z2y3@clusterlangchain.es7v444.mongodb.net/?retryWrites=true&w=majority&appName=ClusterLangChain")
 
 # Define collection and index name
 collection = client[DB_NAME][COLLECTION_NAME]
 
-# if client:
-    # print("Connected to MongoDB Atlas")
-    # print(client.list_database_names())
+if client:
+    print("Connected to MongoDB Atlas")
+    print(client.list_database_names())
 
 # Load the sample data (PDF document)
 loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
@@ -63,7 +63,6 @@ retrieval_chain = (
     {"context": retriever, "question": RunnablePassthrough()}
     | custom_rag_prompt 
     | model
-    | StrOutputParser
 )
 
-
+retrieval_chain.invoke("how to secure database")
