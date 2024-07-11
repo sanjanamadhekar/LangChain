@@ -1,93 +1,69 @@
 from langchain.chains import RetrievalQA
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_openai import ChatOpenAI, OpenAI, OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_core.prompts import PromptTemplate
+from langchain.schema import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pymongo import MongoClient
 from dotenv import load_dotenv
-import os, pprint
+import os
 
 load_dotenv()
 
-model = ChatOpenAI(model="gpt-4-turbo-preview")
+model = ChatOpenAI()
+ATLAS_CONNECTION_STRING = os.getenv("ATLAS_CONNECTION_STRING")
+DB_NAME = os.getenv("DB_NAME")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+ATLAS_VECTOR_SEARCH_INDEX_NAME = os.getenv("ATLAS_VECTOR_SEARCH_INDEX_NAME")
 
-DB_NAME = "langchain_db"
-COLLECTION_NAME = "test"
-ATLAS_VECTOR_SEARCH_INDEX_NAME = "vector_search_index"
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-ATLAS_CONNECTION_STRING = f"mongodb+srv://sandy:{DB_PASSWORD}@langchain.ho6xowb.mongodb.net/?retryWrites=true&w=majority&appName=LangChain"
+# Connect to your Atlas cluster
+client = MongoClient("mongodb+srv://sandy:QbFNnJL2o6SEO0Vo@clusterlangchain.es7v444.mongodb.net/?retryWrites=true&w=majority&appName=ClusterLangChain")
 
-# initialize MongoDB python client
-client = MongoClient(ATLAS_CONNECTION_STRING)
+# Define collection and index name
+collection = client[DB_NAME][COLLECTION_NAME]
 
-MONGODB_COLLECTION = client[DB_NAME][COLLECTION_NAME]
+# if client:
+    # print("Connected to MongoDB Atlas")
+    # print(client.list_database_names())
 
-
-# Load the PDF
-loader = TextLoader("./docs/faq.txt")
+# Load the sample data (PDF document)
+loader = PyPDFLoader("https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4HkJP")
 data = loader.load()
 
-# Split PDF into documents
+# Split PDF into smaller documents
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
 docs = text_splitter.split_documents(data)
 
-# Print the first document
-# print(docs[0].page_content)
-
-# Create the vector store for test.books
-vector_search = MongoDBAtlasVectorSearch.from_documents(
-    documents=docs,
+# Instantiate the vector store
+vector_store = MongoDBAtlasVectorSearch.from_documents(
+    documents=[],
     embedding=OpenAIEmbeddings(disallowed_special=()),
-    collection=MONGODB_COLLECTION,
+    collection=collection,
     index_name=ATLAS_VECTOR_SEARCH_INDEX_NAME
 )
-
-# Create the vector index for test.books
-query = "How to enroll in a course?"
-results = vector_search.similarity_search(query)
-
 # Instantiate Atlas Vector Search as a retriever
-qa_retriever = vector_search.as_retriever(
-    search_type="similarity",
-    search_kwargs={"k": 10, "score_threshold": 0.75}
+retriever = vector_store.as_retriever(
+   search_type = "similarity",
+   search_kwargs = { "k": 1 }
 )
 
-# Define a basic question-answering prompt template
-prompt_template = """
-
+# Define a prompt template
+template = """
 Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
 {context}
-
 Question: {question}
 """
-
-prompt = ChatPromptTemplate.from_template(prompt_template)
-
-
-def format_result(output):
-    return output["result"]
-
-
-# Create the question-answering model
-qa = RetrievalQA.from_chain_type(
-    llm=OpenAI(),
-    retriever=qa_retriever,
-    return_source_documents=True,
-    chain_type="stuff",
-    chain_type_kwargs={"prompt": prompt},
-)
-
+custom_rag_prompt = PromptTemplate.from_template(template)
+ 
+# Construct a chain to answer questions on your data
 retrieval_chain = (
-    {"context": qa_retriever, "question": RunnablePassthrough()}
-    | prompt
+    {"context": retriever, "question": RunnablePassthrough()}
+    | custom_rag_prompt 
     | model
-    | StrOutputParser()
+    | StrOutputParser
 )
 
 
