@@ -8,7 +8,7 @@ from langserve.schema import CustomUserType
 from langchain.schema import (
     AIMessage,
 )
-from qa_retrieval import retrieval_chain
+
 from dotenv import load_dotenv
 import json
 import openai
@@ -51,13 +51,6 @@ add_routes(
     chain,
     path="/joke",
 )
-
-add_routes(
-    app,
-    retrieval_chain,
-    path="/query",
-)
-
 
 # run server
 if __name__ == "__main__":
