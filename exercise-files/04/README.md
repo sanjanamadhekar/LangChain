@@ -24,6 +24,8 @@ python -m venv env
 ```
 source env/bin/activate
 ```
+.\env\Scripts\activate
+```
 
 ## Installation: Install the necessary dependencies by running the following command:
 **MacOS/Linux**:
