@@ -21,8 +21,12 @@ python -m venv env
 ```
 
 ## Activate the virtual environment :
+**MacOS/Linux**:
 ```
 source env/bin/activate
+```
+**Windows**:
+```
 .\env\Scripts\activate
 ```
 
