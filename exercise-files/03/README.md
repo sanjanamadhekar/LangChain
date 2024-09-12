@@ -23,10 +23,14 @@ python -m venv env
 ```
 
 ## Activate the virtual environment :
+**MacOS/Linux**:
 ```
 source env/bin/activate
 ```
-
+**Windows**:
+```
+.\env\Scripts\activate
+```
 ## Installation
 
 To install the repository, follow these steps:
