@@ -20,10 +20,14 @@ python -m venv env
 ```
 
 ## Activate the virtual environment :
+**MacOS/Linux**:
 ```
 source env/bin/activate
 ```
-
+**Windows**:
+```
+.\env\Scripts\activate
+```
 ## Installation: Install the necessary dependencies by running the following command:
 **MacOS/Linux**:
 `pip3 install -r requirements.txt`
