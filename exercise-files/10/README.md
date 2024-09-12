@@ -26,8 +26,9 @@ source env/bin/activate
 
 ```
 python -m venv env
-source env/bin/activate
+.\env\Scripts\activate
 ```
+
 
 ### 🏗️ Installation:
 
