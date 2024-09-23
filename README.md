@@ -1,6 +1,10 @@
 # Level up LLM applications development with LangChain and OpenAI
 This is the repository for the LinkedIn Learning course `Level up LLM applications development with LangChain and OpenAI`. The full course is available from [LinkedIn Learning][lil-course-url].
 
+![lil-thumbnail-url]
+
+Dive into the world of large language models (LLMs) with a focus on integrating them into practical applications utilizing OpenAI APIs. Discover how to enhance LLMs with retrieval components, deploy interactive chat applications, and construct multi-retriever agents for advanced data handling. Join instructor Sandy Ludosky to gain the skills to create intelligent agents capable of performing complex tasks, from semantic searches to question-answering chatbots, significantly enhancing user experiences. Whether you're aiming to innovate in your current role or embark on new AI projects, this course provides the foundational knowledge and practical skills needed to harness the power of LLMs effectively.
+
 _See the readme file in the main branch for updated instructions and information._
 ## Instructions
 This repository has branches for each of the videos in the course. You can use the branch pop up menu in github to switch to a specific branch and take a look at the course at that stage, or you can add `/tree/BRANCH_NAME` to the URL to go to the branch you want to access.
@@ -20,15 +24,18 @@ To resolve this issue:
     Add changes to git using this command: git add .
 	Commit changes using this command: git commit -m "some message"
 
-## Installing
-1. To use these exercise files, you must have the following installed:
-	- [list of requirements for course]
-2. Clone this repository into your local machine using the terminal (Mac), CMD (Windows), or a GUI tool like SourceTree.
-3. [Course-specific instructions]
 
+## Instructor
+
+Sandy Ludosky
+
+Web Developer and Trainer
+
+                            
+Check out my other courses on [LinkedIn Learning](https://www.linkedin.com/learning/instructors/sandy-ludosky?u=104).
 
 [0]: # (Replace these placeholder URLs with actual course URLs)
 
-[lil-course-url]: https://www.linkedin.com/learning/
-[lil-thumbnail-url]: http://
+[lil-course-url]: https://www.linkedin.com/learning/level-up-llm-applications-development-with-langchain-and-openai
+[lil-thumbnail-url]: https://media.licdn.com/dms/image/v2/D4E0DAQGwmelLESCDBg/learning-public-crop_675_1200/learning-public-crop_675_1200/0/1725487495548?e=2147483647&v=beta&t=GpGFNoF8wj05JLubwB1Wq9VOM3mhbTYzPVw4FJZA01s
 
