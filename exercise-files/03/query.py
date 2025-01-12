@@ -1,98 +1,142 @@
-import os
-from dotenv import load_dotenv
-from langchain_community.chat_models import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import TextLoader
-from langchain_openai import OpenAIEmbeddings
-from langchain.text_splitter import (
-    CharacterTextSplitter,
-)
-from langchain.prompts.chat import (
-    HumanMessagePromptTemplate,
-    SystemMessagePromptTemplate,
-)
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
-from langchain.schema.runnable import RunnablePassthrough
+from langchain_text_splitters import CharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_core.documents import Document
-from openai import OpenAI
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+
+from dotenv import load_dotenv
 import warnings
+import os
+
 warnings.filterwarnings("ignore")
-
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def get_embedding(text_to_embed):
-    response = client.embeddings.create(
-        model="text-embedding-ada-002",
-        input= [text_to_embed]
+# Initialize LLM and Embeddings
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+llm = ChatOpenAI()
+
+# Contextualize question prompt
+contextualize_q_system_prompt = """Given a chat history and the latest user question {input}, \
+formulate a standalone question which can be understood without the chat history. \
+Do NOT answer the question, just reformulate it if needed and otherwise return it as is."""
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
+
+# QA system prompt
+qa_system_prompt = """You are an assistant for question-answering tasks. \
+Use the following pieces of retrieved context to answer the question. \
+If you don't know the answer, just say that you don't know. \
+Use three sentences maximum and keep the answer concise.
+
+Context: {context}
+Question: {input}
+"""
+qa_prompt = ChatPromptTemplate.from_messages([
+    ("system", qa_system_prompt),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+# Indexing
+def initialize_vectorstore(document_path):
+    """Initialize the vector store from a given document path"""
+    try:
+        documents = TextLoader(document_path).load()
+        text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=0, separator="\n")
+        splits = text_splitter.split_documents(documents)
+
+        vectorstore = Chroma.from_documents(
+            documents=splits,
+            embedding=embeddings,
+            collection_name="faq_collection",
+            persist_directory="./chroma_db"
+        )
+        return vectorstore
+    except Exception as e:
+        print(f"Error initializing vector store: {e}")
+        return None
+
+# Initialize vector store (adjust path as needed)
+vectorstore = initialize_vectorstore("./docs/faq.txt")
+
+# Retriever setup
+def setup_retriever(vectorstore):
+    """Set up the retriever with the vector store"""
+    if vectorstore is None:
+        return None
+    return vectorstore.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": 4}
     )
-    print(response.data[0].embedding)
 
-template: str = """/
-    You are a customer support specialist /
-    question {question}. 
-    You assist users with general inquiries based on {context}/
-    and  technical issues. /
+retriever = setup_retriever(vectorstore)
+
+def format_docs(docs):
+    """Format retrieved documents into a single string"""
+    return "\n\n".join(doc.page_content for doc in docs)
+
+# Chat history management
+chat_history = []
+
+def query(input_text):
     """
+    Main query function that returns a response to the user input
     
-# define prompt
-system_message_prompt_template = SystemMessagePromptTemplate.from_template(template)
-human_message_prompt_template = HumanMessagePromptTemplate.from_template(
-    input_variables = ["question", "context"],
-    template = "{question}"
-)
-chat_prompt_template = ChatPromptTemplate.from_messages(
-    [system_message_prompt_template, 
-     human_message_prompt_template]
-)
-
-# init model
-model = ChatOpenAI()
-
-# indexing
-def load_split_documents():
-    """Load a file from path, split it into chunks, embed each chunk and load it into the vector store."""
-    raw_text = TextLoader("./docs/faq.txt").load()
-    text_splitter = CharacterTextSplitter(chunk_size= 30, chunk_overlap=0, separator=".")
-    chunks = text_splitter.split_documents(raw_text)
-    # print(f"Number of chunks:, {len(chunks)}")
-    # print(chunks[0])
-    return chunks
-
-# convert to embeddings
-def load_embeddings(documents, user_query):
+    Args:
+        input_text (str): User's input question
+    
+    Returns:
+        str: Generated response
     """
-    Create a vector store from a set of documents and perform a similarity search.
-    """
-    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
-    vector_store = Chroma(
-        collection_name="example_collection",
-        embedding_function=embeddings,
-        persist_directory="./chroma_langchain_db"  
-    )
-    vector_store.add_texts([doc.page_content for doc in documents])
-    docs = vector_store.similarity_search(user_query, k=1)  # Retrieve top 3 results
-    print(docs)
-    # get_embedding(user_query)
-    # _ = [get_embedding(doc.page_content) for doc in docs]
-    return vector_store.as_retriever()
+    # Check if vectorstore and retriever are initialized
+    if vectorstore is None or retriever is None:
+        return "Error: Vector store not initialized. Cannot process query."
 
-def generate_response(retriever, query):
-    """Generate a response to a user query."""
-    chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
-        | chat_prompt_template
-        | model
-        | StrOutputParser()
-    )
-    return chain.invoke(query)
+    try:
+        # Retrieve relevant documents
+        retrieved_docs = retriever.invoke(input_text)
+        context = format_docs(retrieved_docs)
 
+        # Generate response using the context
+        response = llm.invoke(
+            qa_prompt.format_messages(
+                chat_history=chat_history,
+                input=input_text,
+                context=context
+            )
+        ).content
 
-def query(query_text):
-    """Query the model with a user query."""
-    documents = load_split_documents()
-    retriever = load_embeddings(documents, query_text)
-    return generate_response(retriever, query_text)
+        # Update chat history
+        chat_history.extend([
+            HumanMessage(content=input_text), 
+            HumanMessage(content=response)
+        ])
+        
+        return response
+    
+    except Exception as e:
+        # Fallback for any unexpected errors
+        print(f"Error processing query: {e}")
+        return f"I'm sorry, but I encountered an error: {str(e)}"
 
-# query("What is the return policy?")
+# Optional: Add a cleanup method
+def cleanup_vectorstore():
+    """Clean up the Chroma vector store"""
+    if vectorstore:
+        try:
+            vectorstore.delete_collection()
+            print("Vector store collection deleted.")
+        except Exception as e:
+            print(f"Error deleting vector store collection: {e}")
+
+# Ensure proper cleanup when the script is about to exit
+import atexit
+atexit.register(cleanup_vectorstore)
