@@ -129,52 +129,52 @@ def query(input_text):
         return f"I'm sorry, but I encountered an error: {str(e)}"
     
 # For complex multi-turn dialogues, we can use the following enhanced query function   
-def query(input_text):
-    """
-    Enhanced query processing function with context reformulation
-    """
-    # Validate vector store initialization
-    if vectorstore is None or retriever is None:
-        return "Error: Vector store not initialized. Cannot process query."
+# def query(input_text):
+#     """
+#     Enhanced query processing function with context reformulation
+#     """
+#     # Validate vector store initialization
+#     if vectorstore is None or retriever is None:
+#         return "Error: Vector store not initialized. Cannot process query."
 
-    try:
-        # Step 1: Reformulate the question considering chat history
-        if chat_history:
-            # Use language model to reformulate the question
-            reformulated_query = llm.invoke(
-                contextualize_q_prompt.format_messages(
-                    chat_history=chat_history,
-                    input=input_text
-                )
-            ).content
-        else:
-            # If no chat history, use original input
-            reformulated_query = input_text
+#     try:
+#         # Step 1: Reformulate the question considering chat history
+#         if chat_history:
+#             # Use language model to reformulate the question
+#             reformulated_query = llm.invoke(
+#                 contextualize_q_prompt.format_messages(
+#                     chat_history=chat_history,
+#                     input=input_text
+#                 )
+#             ).content
+#         else:
+#             # If no chat history, use original input
+#             reformulated_query = input_text
 
-        # Step 2: Retrieve relevant documents based on reformulated query
-        retrieved_docs = retriever.invoke(reformulated_query)
-        context = format_docs(retrieved_docs)
+#         # Step 2: Retrieve relevant documents based on reformulated query
+#         retrieved_docs = retriever.invoke(reformulated_query)
+#         context = format_docs(retrieved_docs)
 
-        # Step 3: Generate response using retrieved context
-        response = llm.invoke(
-            qa_prompt.format_messages(
-                chat_history=chat_history,
-                input=reformulated_query,
-                context=context
-            )
-        ).content
+#         # Step 3: Generate response using retrieved context
+#         response = llm.invoke(
+#             qa_prompt.format_messages(
+#                 chat_history=chat_history,
+#                 input=reformulated_query,
+#                 context=context
+#             )
+#         ).content
 
-        # Step 4: Update chat history
-        chat_history.extend([
-            HumanMessage(content=input_text),
-            HumanMessage(content=response)
-        ])
+#         # Step 4: Update chat history
+#         chat_history.extend([
+#             HumanMessage(content=input_text),
+#             HumanMessage(content=response)
+#         ])
         
-        return response
+#         return response
     
-    except Exception as e:
-        print(f"Error processing query: {e}")
-        return f"I'm sorry, but I encountered an error: {str(e)}"
+#     except Exception as e:
+#         print(f"Error processing query: {e}")
+#         return f"I'm sorry, but I encountered an error: {str(e)}"
 
 
 # Optional: Add a cleanup method
