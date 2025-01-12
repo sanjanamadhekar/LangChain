@@ -31,14 +31,17 @@ def get_embedding(text_to_embed):
 
 template: str = """/
     You are a customer support specialist /
-    question: {question}. 
-    You assist users with general inquiries based on {context} /
+    question. 
+    You assist users with general inquiries based on /
     and  technical issues. /
     """
     
 # define prompt
+system_message_prompt_template = SystemMessagePromptTemplate.from_template(template)
+chat_prompt_template = ChatPromptTemplate.from_messages([system_message_prompt_template, HumanMessagePromptTemplate.from_template("{user_query}")])
 
 # init model
+model = ChatOpenAI()
 
 # indexing
 def load_split_documents():
@@ -64,19 +67,20 @@ def load_embeddings(documents, user_query):
     vector_store.add_texts([doc.page_content for doc in documents])
     docs = vector_store.similarity_search(user_query, k=1)  # Retrieve top 3 results
     print(docs)
-    get_embedding(user_query)
-    _ = [get_embedding(doc.page_content) for doc in docs]
+    # get_embedding(user_query)
+    # _ = [get_embedding(doc.page_content) for doc in docs]
 
 
-def generate_response(retriever, query):
+def generate_response(query):
     """Generate a response to a user query."""
-    pass
+    chain = chat_prompt_template | model | StrOutputParser()
+    return chain.invoke({"user_query":query})
 
 
 def query(query_text):
     """Query the model with a user query."""
     documents = load_split_documents()
     load_embeddings(documents, query_text)
-
+    return generate_response(query_text)
 
 query("What is the return policy?")
