@@ -32,6 +32,7 @@ def ask():
         else:
 
             response = query(user_input)
+
             print(Fore.BLUE + "A: " + response["answer"] + Fore.RESET)
             print(Fore.WHITE + 
                   "\n-------------------------------------------------")
