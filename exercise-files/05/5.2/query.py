@@ -6,14 +6,13 @@ from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain.schema import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain_openai import ChatOpenAI
 from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from typing import List, Optional
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain import hub
 from langchain_core.runnables import chain
 from dotenv import load_dotenv
@@ -21,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 llm = ChatOpenAI(temperature=0)
-llm_function_calling = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
+llm_function_calling = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 # Prompt with Query analysis
 class Search(BaseModel):
@@ -46,13 +45,13 @@ prompt = ChatPromptTemplate.from_messages(
         ("human", "{question}"),
     ]
 )
-structured_llm = llm_function_calling.with_structured_output(Search)
+structured_llm = llm_function_calling.with_structured_output(Search, method = 'function_calling')
 query_analyzer = {"question": RunnablePassthrough()} | prompt | structured_llm 
 
 # Prompt for Retrieval and Generation tasks
 template: str = """/
     You are a customer support specialist /
-    question: {question}. 
+    who answers question: {question}. 
     You assist users with general inquiries based on {context} /
     """
 
@@ -72,23 +71,40 @@ chat_prompt_template = ChatPromptTemplate.from_messages([
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
 raw_text_shoes = TextLoader('./docs/faq_shoes.txt').load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+documents = text_splitter.split_documents(raw_text_shoes)
+vector_store = Chroma.from_documents(documents, embeddings, collection_name="shoes", persist_directory="./chroma_db_shoes")
+retriever_shoes = vector_store.as_retriever(search_kwargs={"k": 1})
 
 raw_text_shirts = TextLoader('./docs/faq_shirts.txt').load()
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+documents = text_splitter.split_documents(raw_text_shirts)
+vector_store = Chroma.from_documents(documents, embeddings, collection_name="shirts", persist_directory="./chroma_db_shirts")
+retriever_shirts = vector_store.as_retriever(search_kwargs={"k": 1})
 
 
 # Retrieval with Query analysis
 retrievers = {
-    "SHOES": {},
-    "SHIRTS": {},
+    "SHOES": retriever_shoes,
+    "SHIRTS": retriever_shirts,
 }
 
 def select_retriever_query_analysis(question):
     """Select a retriever based on the query analysis."""
-    pass
+    structured_output = query_analyzer.invoke(question)
+    category = structured_output.category
+    return retrievers[category]
 
 def query(user_query: str):
     """Final chain to query, retrieve information and generate augmented response."""
-    pass  
+    retriever = select_retriever_query_analysis(user_query)
+    return (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | chat_prompt_template
+        | llm
+        | StrOutputParser()
+    ).invoke(user_query)
+ 
 
 response = query("how long do we have to return shirts?")
 print(response)
